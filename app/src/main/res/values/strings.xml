@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">粥游存档</string>
+
+    <string name="add_prefs">添加本地存档</string>
+    <string name="del_prefs">删除所选存档</string>
+    <string name="action_export">导出数据</string>
+    <string name="action_import">导入数据</string>
+    <string name="action_add_token">手动添加游客帐号</string>
+
+    <string name="action_apply_token">切换到这个帐号</string>
+    <string name="action_edit">修改别名</string>
+    <string name="action_delete">从APP中移除</string>
+
+    <string name="load_token">读取当前游客帐号</string>
+    <string name="delete_token">删除所选游客帐号</string>
+    <string name="default_prefs_file">/data/data/com.hypergryph.arknights/shared_prefs/com.hypergryph.arknights.v2.playerprefs.xml</string>
+    <string name="token_name_hint">游客帐号别名</string>
+    <string name="token_token_hint">TOKEN</string>
+    <string name="fs_name_hint">存档别名</string>
+    <string name="fs_path_hint">存档地址(.xml文件)</string>
+</resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_apply"
+        android:orderInCategory="0"
+        android:title="@string/action_apply_token" />
+    <item
+        android:id="@+id/action_edit"
+        android:orderInCategory="1"
+        android:title="@string/action_edit" />
+    <item
+        android:id="@+id/action_delete"
+        android:orderInCategory="2"
+        android:title="@string/action_delete" />
+</menu>

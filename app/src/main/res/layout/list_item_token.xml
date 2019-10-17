@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="@dimen/list_item_padding"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:lines="1"
+        android:ellipsize="end"
+        android:textColor="@color/list_item_title_color"
+        android:textSize="@dimen/list_item_title_font_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1111111"
+        android:id="@+id/title" />
+
+</LinearLayout>

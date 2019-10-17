@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_load_token"
+        android:orderInCategory="0"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_action_add"
+        android:title="@string/load_token" />
+<!--    <item-->
+<!--        android:id="@+id/action_del_select_tokens"-->
+<!--        android:orderInCategory="0"-->
+<!--        app:showAsAction="ifRoom"-->
+<!--        android:icon="@drawable/ic_action_delete"-->
+<!--        android:title="@string/delete_token" />-->
+</menu>

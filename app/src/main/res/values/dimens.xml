@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="list_item_padding">8sp</dimen>
+    <dimen name="list_item_desc_margin_top">2sp</dimen>
+    <dimen name="list_item_title_font_size">16sp</dimen>
+    <dimen name="list_item_desc_font_size">12sp</dimen>
+</resources>
