@@ -20,6 +20,17 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        applicationVariants.all{
+            variant ->
+                variant.outputs.all{
+                    output ->
+                        def fileName = "akPrefsManage-v${variant.versionName}.apk"
+                        def outFile = output.outputFile
+                        if (outFile != null && outFile.name.endsWith('.apk')) {
+                            outputFileName = fileName  //  output.outputFile 改为 outputFileName
+                        }
+                }
+        }
     }
 }
 
