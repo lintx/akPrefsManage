@@ -22,7 +22,6 @@ class PrefsAdapter (private val list:ArrayList<PrefsModel>, private val context:
         }
         holder.titleView.text = list[position].name
         holder.descView.text = list[position].path
-//        holder
         return v
     }
 

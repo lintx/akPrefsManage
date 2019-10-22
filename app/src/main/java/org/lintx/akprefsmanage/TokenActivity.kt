@@ -18,6 +18,7 @@ import org.lintx.akprefsmanage.utils.PrefsManage
 
 class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     private var prefsPath :String = ""
+    private var prefsName :String = ""
     private var token = "null"
     private val prefs = Prefs.get()
     private var adapter :TokensAdapter?=null
@@ -27,12 +28,13 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
         setContentView(R.layout.activity_token)
 
         val actionBar = supportActionBar
-        actionBar!!.title = "存档管理"
+
+        prefsPath = intent.extras!!.getString("prefsPath").toString()
+        prefsName = intent.extras!!.getString("prefsName").toString()
+        actionBar!!.title = "存档管理:" + prefsName
         actionBar.setDisplayHomeAsUpEnabled(true)
 
-        prefsPath = intent.extras!!.getString("prefs").toString()
-
-        adapter = TokensAdapter(prefs.data.tokenList,this)
+        adapter = TokensAdapter(prefs.tokenList,this)
         listView.adapter = adapter
         listView.onItemClickListener = this
 
@@ -66,7 +68,7 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                         return true
                     }
 
-                    prefs.data.tokenList.forEach {
+                    prefs.tokenList.forEach {
                         if (it.token==token){
                             Toast.makeText(this,"该游客帐号已经添加过",Toast.LENGTH_SHORT).show()
                             return true
@@ -84,8 +86,8 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                         Toast.makeText(this,"游客帐号别名不能为空",Toast.LENGTH_SHORT).show()
                         return@setPositiveButton
                     }
-                    prefs.data.tokenList.add(TokensModel(name,token))
-                    prefs.saveData(this)
+                    prefs.tokenList.add(TokensModel(name,token))
+                    prefs.saveTokens(this)
                     token = "null"
                     adapter!!.notifyDataSetChanged()
                 }
@@ -99,7 +101,7 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
     }
 
     private fun showPopup(view: View,position: Int) {
-        var popup: PopupMenu?
+        val popup: PopupMenu?
         popup = PopupMenu(this, view)
         popup.inflate(R.menu.token_action_menu)
 
@@ -107,7 +109,7 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
             when(item!!.itemId){
                 R.id.action_edit -> {
                     val titleView = EditText(this)
-                    titleView.setText(prefs.data.tokenList[position].name)
+                    titleView.setText(prefs.tokenList[position].name)
                     val dialog = AlertDialog.Builder(this,R.style.Theme_AppCompat_Light_Dialog_Alert)
                     dialog.setTitle("修改游客帐号别名")
                     dialog.setView(titleView)
@@ -117,8 +119,8 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                             Toast.makeText(this,"游客帐号别名不能为空",Toast.LENGTH_SHORT).show()
                             return@setPositiveButton
                         }
-                        prefs.data.tokenList[position].name = name
-                        prefs.saveData(this)
+                        prefs.tokenList[position].name = name
+                        prefs.saveTokens(this)
                         adapter!!.notifyDataSetChanged()
                     }
                     dialog.setNegativeButton("取消",null)
@@ -129,8 +131,8 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                     dialog.setTitle("操作确认")
                     dialog.setMessage("你确定要从本APP中将这个游客帐号移除吗？\n从本APP中移除存档不会影响明日方舟存档，\n但是你可能永远也找不回这个游客帐号了。")
                     dialog.setPositiveButton("确定") { _, _ ->
-                        prefs.data.tokenList.removeAt(position)
-                        prefs.saveData(this)
+                        prefs.tokenList.removeAt(position)
+                        prefs.saveTokens(this)
                         adapter!!.notifyDataSetChanged()
                     }
                     dialog.setNegativeButton("取消",null)
@@ -143,7 +145,7 @@ class TokenActivity : AppCompatActivity(), AdapterView.OnItemClickListener {
                         dialog.setTitle("操作确认")
                         dialog.setMessage("你确定要将这个游客帐号应用到明日方舟存档中吗？\n应用后如果明日方舟存档中有未保存的游客帐号，\n那么未保存的游客帐号将无法找回。")
                         dialog.setPositiveButton("确定") { _, _ ->
-                            manage.writeToken(prefs.data.tokenList[position].token)
+                            manage.writeToken(prefs.tokenList[position].token)
                             Toast.makeText(this,"操作成功",Toast.LENGTH_SHORT).show()
                         }
                         dialog.setNegativeButton("取消",null)

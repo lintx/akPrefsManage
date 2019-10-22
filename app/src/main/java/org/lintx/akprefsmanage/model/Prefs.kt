@@ -2,9 +2,14 @@ package org.lintx.akprefsmanage.model
 
 import android.content.Context
 import com.beust.klaxon.Klaxon
+import com.onedrive.sdk.concurrency.ICallback
+import com.onedrive.sdk.core.ClientException
+import com.onedrive.sdk.extensions.Item
 import org.lintx.akprefsmanage.utils.PrefsManage
 import org.lintx.akprefsmanage.R
+import org.lintx.akprefsmanage.utils.OneDrive
 import java.io.File
+import java.io.InputStream
 import java.lang.Exception
 
 class DataModel(
@@ -22,11 +27,17 @@ class TokensModel(
     val token:String = ""
 )
 
+class Config(
+    var oneDriveSync:Boolean = false
+)
+
 class Prefs private constructor() {
-    var data:DataModel = DataModel()
+    private var data:DataModel = DataModel()
+    var fsList:ArrayList<PrefsModel> = ArrayList()
+    var tokenList:ArrayList<TokensModel> = ArrayList()
+    var config:Config = Config()
 
     companion object {
-
         private var instance: Prefs? = null
             get() {
                 if (field == null) {
@@ -35,40 +46,169 @@ class Prefs private constructor() {
                 return field
             }
         fun get(): Prefs{
-            //细心的小伙伴肯定发现了，这里不用getInstance作为为方法名，是因为在伴生对象声明时，内部已有getInstance方法，所以只能取其他名字
             return instance!!
         }
     }
 
     fun loadData(context: Context){
-        val file = getStorgeFile(context)
-        try {
-            data = Klaxon().parse<DataModel>(file)!!
-        }catch (e:Exception){
-            
+        loadPrefs(context)
+        loadTokens(context)
+        loadConfig(context)
+        if (fsList.isEmpty() && tokenList.isEmpty()){
+            tryLoadOldData(context)
         }
-        if (data.fsList.isEmpty()){
+        if (fsList.isEmpty()){
             val f = context.getString(R.string.default_prefs_file)
             val manage = PrefsManage(context, f)
             if (manage.checkFile()){
-                data.fsList.add(PrefsModel("默认存档",f))
-                saveData(context)
+                fsList.add(PrefsModel("默认存档",f))
+                savePrefs(context)
             }
         }
     }
 
-    fun saveData(context: Context){
-        val file = getStorgeFile(context)
-        val json = Klaxon().toJsonString(data)
-        file.writeText(json)
+    private fun loadPrefs(context: Context){
+        val file = getPrefsFile(context)
+        try {
+            val list: List<PrefsModel> = Klaxon().parseArray(file)!!
+            for (item in list){
+                fsList.add(item)
+            }
+        }catch (e:Exception){
+
+        }
     }
 
-    private fun getStorgeFile(context: Context):File{
+    private fun loadConfig(context: Context){
+        val file = getConfigFile(context)
+        try {
+            config = Klaxon().parse<Config>(file)!!
+        }catch (e:Exception){
+
+        }
+    }
+
+    private fun loadTokens(context: Context){
+        val file = getTokensFile(context)
+        try {
+            val list: List<TokensModel> = Klaxon().parseArray(file)!!
+            for (item in list){
+                tokenList.add(item)
+            }
+        }catch (e:Exception){
+        }
+    }
+
+    fun syncOneDriveTokens(context: Context,stream:InputStream){
+        var changed = false
+        try {
+            val list: List<TokensModel> = Klaxon().parseArray(stream)!!
+            for (token in list){
+                println("onedrive file" + token.name + ":" + token.token)
+                var localHas = false
+                for (item in tokenList){
+                    if (item.token==token.token){
+                        localHas = true
+                        break
+                    }
+                }
+                if (!localHas){
+                    changed = true
+                    tokenList.add(token)
+                }
+            }
+        }catch (e:Exception){
+
+        }
+        if (changed){
+            saveTokens(context)
+        }
+    }
+
+    private fun tryLoadOldData(context: Context){
         val path = context.getDir("data",Context.MODE_PRIVATE)
         if (!path.exists()){
             path.mkdirs()
         }
         val file = File(path,"data.json")
+        if (!file.exists()){
+            return
+        }
+        try {
+            data = Klaxon().parse<DataModel>(file)!!
+        }catch (e:Exception){
+
+        }
+        if (data.fsList.isNotEmpty() || data.tokenList.isNotEmpty()){
+            fsList = data.fsList
+            tokenList = data.tokenList
+            savePrefs(context)
+            saveTokens(context)
+        }
+        file.delete()
+    }
+
+    fun savePrefs(context: Context){
+        val file = getPrefsFile(context)
+        val json = Klaxon().toJsonString(fsList)
+        file.writeText(json)
+    }
+
+    fun saveTokens(context: Context){
+        val file = getTokensFile(context)
+        val json = Klaxon().toJsonString(tokenList)
+        file.writeText(json)
+
+        if (config.oneDriveSync){
+            val callback = object : ICallback<Item> {
+                override fun success(result: Item?) {
+
+                }
+
+                override fun failure(ex: ClientException?) {
+
+                }
+            }
+            OneDrive.get().updateTokens(context,callback)
+        }
+    }
+
+    fun saveConfig(context: Context){
+        val file = getConfigFile(context)
+        val json = Klaxon().toJsonString(config)
+        file.writeText(json)
+    }
+
+    private fun getPrefsFile(context: Context):File{
+        val path = context.getDir("data",Context.MODE_PRIVATE)
+        if (!path.exists()){
+            path.mkdirs()
+        }
+        val file = File(path,"prefs.json")
+        if (!file.exists()){
+            file.createNewFile()
+        }
+        return file
+    }
+
+    fun getTokensFile(context: Context):File{
+        val path = context.getDir("data",Context.MODE_PRIVATE)
+        if (!path.exists()){
+            path.mkdirs()
+        }
+        val file = File(path,"tokens.json")
+        if (!file.exists()){
+            file.createNewFile()
+        }
+        return file
+    }
+
+    private fun getConfigFile(context: Context):File{
+        val path = context.getDir("data",Context.MODE_PRIVATE)
+        if (!path.exists()){
+            path.mkdirs()
+        }
+        val file = File(path,"config.json")
         if (!file.exists()){
             file.createNewFile()
         }

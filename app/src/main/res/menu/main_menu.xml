@@ -29,4 +29,8 @@
         android:id="@+id/action_add_token"
         android:orderInCategory="1"
         android:title="@string/action_add_token" />
+    <item
+        android:id="@+id/action_onedrive"
+        android:orderInCategory="2"
+        android:title="" />
 </menu>
